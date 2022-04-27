@@ -8,10 +8,22 @@
                     <input v-model="nom" type="text" class="form-control" id="floatingInput1" >
                     <label for="floatingInput1">Nom</label>
                 </div>
-                <div class="form-floating mb-3">
+                <!-- <div class="form-floating mb-3">
                     <input v-model="client" type="text" class="form-control" id="floatingInput2" >
                     <label for="floatingInput2">Client</label>
+                </div> -->
+                <div class="row mb-3">
+                    <div class="col mb-3">
+                        Client
+                    </div>
+                    <div class="col mb-3">
+                        <select v-model="client" class="form-select form-select-md">
+                            <option value=""></option>
+                            <option v-for="cl in clients" :key="cl._id" :value="cl.nom">{{cl.nom}}</option>
+                        </select>
+                    </div>
                 </div>
+                
                 <div class="row">
                     <div class="col">
                         <div class="form-floating mb-3">
@@ -27,17 +39,35 @@
                     </div>
                 </div>  
                 <div class="row my-4">
-                    <div class="col-3">
-                        <label class="h5">Status :</label>
+                    <div class="col-md-5">
+                        <div class="row">
+                            <div class="col-3">
+                                Status
+                            </div>
+                            <div class="col-8">
+                                <select v-model="status" class="form-select form-select-md">
+                                    <option value="Prospecter">Prospecter</option>
+                                    <option value="En cours">En cours</option>
+                                    <option value="Reception provisoir">Reception provisoir</option>
+                                    <option value="Reception définitif">Reception définitif</option>
+                                    <option value="Cloturer">Cloturer</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-9">
-                        <select v-model="status" class="form-select form-select-md">
-                            <option value="Prospecter">Prospecter</option>
-                            <option value="En cours">En cours</option>
-                            <option value="Reception provisoir">Reception provisoir</option>
-                            <option value="Reception définitif">Reception définitif</option>
-                            <option value="Cloturer">Cloturer</option>
-                        </select>
+                    <div class="col-md-7">
+                        <div class="row">
+                            <div class="col-md-4">
+                                Type de commande
+                            </div>
+                            <div class="col-md-8">
+                                <select @change="toggleGarantie" v-model="type_commande" class="form-select form-select-md">
+                                    <option value="Marché">Marché</option>
+                                    <option value="Bon de commande">Bon de commande</option>
+                                    <option value="Marché cadre">Marché cadre</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
                     
                 </div>
@@ -49,7 +79,7 @@
                         </div>
                     </div>
                     <div class="col">
-                        <div class="form-floating mb-3">
+                        <div v-if="show_garantie" class="form-floating mb-3">
                             <input v-model="garantie" type="number" class="form-control" min="0" step="100" id="floatingInput6">
                             <label for="floatingInput4">Garantie DH</label>
                         </div>
@@ -67,6 +97,7 @@
 
 <script>
 import EventBus from "@vertx/eventbus-bridge-client.js";
+import axios from "axios";
 import Swal from 'sweetalert2'
 
 export default {
@@ -77,10 +108,15 @@ export default {
             date_debut:null,
             date_fin:null,
             status:"",
+            type_commande:"",
             montant:0,
             garantie:0,
             error:'',
-            loading:false
+            loading:false,
+            show_garantie:false,
+            // 
+            clients:[],
+            new_client:false
         }
     },
     methods:{
@@ -88,9 +124,14 @@ export default {
             this.$router.back()
         },
         addProject(){
-            if(this.nom===""||this.client===""||this.date_debut===null||this.date_fin===""||this.status===""||this.montant===0||this.garantie===0){
+            if(this.nom===""||this.client===""||this.date_debut===null||this.date_fin===""||this.status===""||this.montant===0){
                 this.error="rempliser tous les champs"
                 return
+            }
+            if(this.show_garantie){
+                if(this.garantie===0){
+                    this.error="ajouter Garantie"
+                }
             }
             if(new Date(this.date_fin).setHours(0,0,0,0)-new Date(this.date_debut).setHours(0,0,0,0)<=0){
                 this.error="Date fin inférieur à date debut"
@@ -107,8 +148,9 @@ export default {
                     date_debut:ref.date_debut,
                     date_fin:ref.date_fin,
                     status:ref.status,
+                    type_commande:ref.type_commande,
                     montant:ref.montant,
-                    garantie:ref.garantie,
+                    garantie:ref.show_garantie ? ref.garantie : "",
                     type:'project'
                 }
                 eb.send('add.project',project,(err,msg)=>{
@@ -127,7 +169,19 @@ export default {
                 console.log("disconnected");
                 eb = null;
             };
+        },
+        toggleGarantie(){
+            if(this.type_commande==="Bon de commande"){
+                this.show_garantie=true
+            }else{
+                this.show_garantie=false
+            }
         }
+    },
+    mounted(){
+        axios.get('http://localhost:8888/clients')
+        .then(res=>{this.clients=res.data})
+        .catch(err=>console.log(err))
     }
 }
 </script>

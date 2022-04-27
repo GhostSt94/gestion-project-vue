@@ -1,6 +1,6 @@
 <template>
   <!-- <router-link to="/">Home</router-link> -->
-  <div class="container-fluid bg-secondary bg-opacity-10 min-vh-100">
+  <div class="container-fluid bg-secondary bg-opacity-10 min-vh-100 p-0">
     <router-view></router-view>
   </div>
 </template>

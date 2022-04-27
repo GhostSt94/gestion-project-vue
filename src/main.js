@@ -2,8 +2,11 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import * as VueRouter from 'vue-router'
 import HomePage from './components/HomePage.vue'
-import AddProject from './components/AddProject.vue'
+import AddProject from './components/add/AddProject.vue'
+import AddClient from './components/add/AddClient.vue'
+import ListeClients from './components/ListeClients.vue'
 import ProjectDetails from './components/ProjectDetails.vue'
+import RegisterUser from './components/auth/RegisterUser.vue'
 
 const router = VueRouter.createRouter({
     history: VueRouter.createWebHistory(),
@@ -14,14 +17,34 @@ const router = VueRouter.createRouter({
             component: HomePage
         },
         {
-            path: '/ajouter',
-            name: 'ajouter',
+            path: '/clients',
+            name: 'Clients',
+            component: ListeClients
+        },
+        {
+            path: '/clients/:id',
+            name: 'ClientDetails',
+            component: AddClient
+        },
+        {
+            path: '/ajouter/projet',
+            name: 'addProject',
             component: AddProject
+        },
+        {
+            path: '/ajouter/client',
+            name: 'AddClient',
+            component: AddClient
         },
         {
             path: '/project/:id',
             name: 'details',
             component: ProjectDetails
+        },
+        {
+            path: '/auth/register',
+            name: 'register',
+            component: RegisterUser
         },
         {
             path: '/:catchAll(.*)',

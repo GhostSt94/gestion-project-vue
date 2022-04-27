@@ -47,7 +47,16 @@
                                 </tbody>
                             </table>
                         </div>
-                        <div class="col-12 mb-3">
+                        <div class="col-6 mb-3">
+                            <span class="text-muted"><i>Type de commande</i> </span><br> 
+                            <select @change="toggleGarantie" v-if="updating" v-model="project.type_commande" class="form-select form-select-md" aria-label=".form-select-sm">
+                                <option value="Marché">Marché</option>
+                                <option value="Bon de commande">Bon de commande</option>
+                                <option value="Marché cadre">Marché cadre</option>
+                            </select>
+                            <span v-else-if="project.type_commande" class="h5 fw-bold">{{project.type_commande}}</span>
+                        </div>
+                        <div class="col-6 mb-3">
                             <span class="text-muted"><i>Status</i> </span><br> 
                             <select v-if="updating" v-model="project.status" class="form-select form-select-md" aria-label=".form-select-sm">
                                 <option value="Prospecter">Prospecter</option>
@@ -58,6 +67,7 @@
                             </select>
                             <span v-else class="h5 fw-bold">{{project.status}}</span>
                         </div>
+                        <hr class="my-3">
                         <div class="col-6 mb-3">
                             <span class="text-muted"><i>Montant</i> </span><br> 
                             <input v-if="updating" type="number" min="0" step="100" class="form-control" v-model="project.montant">
@@ -65,8 +75,8 @@
                         </div>
                         <div class="col-6 mb-3">
                             <span class="text-muted"><i>Garantie</i> </span><br> 
-                            <input v-if="updating" type="number" min="0" step="100" class="form-control" v-model="project.garantie">
-                            <span v-else class="h5 fw-bold">{{project.garantie}} DH</span>
+                            <input v-if="updating && show_garantie" type="number" min="0" step="100" class="form-control" v-model="project.garantie">
+                            <span v-else-if="show_garantie" class="h5 fw-bold">{{project.garantie}} DH</span>
                         </div>
                     </div>
                     <button v-if="updating" @click="updateProject" class="btn btn-warning float-end">Modifier</button>
@@ -147,6 +157,7 @@ export default {
                 date_debut:null,
                 date_fin:null,
                 status:"",
+                type_commande:"",
                 montant:0,
                 garantie:0,
                 file:null
@@ -156,23 +167,37 @@ export default {
             updating:false,
             factures:[],
             files:[],
+            show_garantie:null,
             // 
             error:'',
         }
     },
     methods:{
+        // return to home
         back(){
             this.$router.back()
         },
+        // switch to update mode
         toggleUpdate(){
             this.updating=!this.updating
         },
+        // get all factures from child modal after adding one
         newFactures({msg}){
             this.factures=msg
         },
+        // get file project added in child modal 
         reloadProject({msg}){
             this.project=msg
         },
+        // display garantie field if type commande is bon de commande
+        toggleGarantie(){
+            if(this.project.type_commande==="Bon de commande"){
+                this.show_garantie=true
+            }else{
+                this.show_garantie=false
+            }
+        },
+        // delete project
         deleteProject(id){
             var ref=this
             Swal.fire({
@@ -197,6 +222,7 @@ export default {
                 })
             
         },
+        // update the project
         updateProject(){
             var ref=this
             Swal.fire({
@@ -208,6 +234,11 @@ export default {
                     if (result.isConfirmed) {
                         var eb = new EventBus('http://localhost:8888/eventbus');
                         eb.onopen = function() {
+                            if(!ref.show_garantie){
+                                ref.project.garantie=''
+                            }else{
+                                ref.project.garantie===''?ref.project.garantie=0:null
+                            }
                             eb.send('update.project', ref.project,(err) =>{
                                 if(err){
                                     console.log(err);
@@ -222,6 +253,7 @@ export default {
                     } 
                 })
         },
+        // delete a facture
         deleteFacture(e,id){
             Swal.fire({
                 title: 'Supprimer cette Facture ?',
@@ -242,6 +274,7 @@ export default {
                     } 
                 })
         },
+        // delete the project file
         deleteProjectFile(id){
             var ref=this
             var eb = new EventBus('http://localhost:8888/eventbus');
@@ -257,6 +290,7 @@ export default {
                 });
             }
         },
+        // get the project details with id
         getProject(eb,ref){
             eb.send('get.project', ref.$route.params.id,(err,msg) =>{
                 if(err){
@@ -269,7 +303,8 @@ export default {
                 }
                 ref.loading=false
                 ref.project=msg.body
-                console.log(ref.project);
+                ref.project.garantie===""?ref.show_garantie=false:ref.show_garantie=true
+
             });
         }
     },

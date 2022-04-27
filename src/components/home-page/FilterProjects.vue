@@ -1,21 +1,31 @@
 <template>
   <div class="container">
       <div class="row p-3 mb-3 justify-content-center">
-            <div class="col-md-3 col-sm-5 p-2">
-                <select v-model="client" class="form-select form-select-md">
-                    <option value=""></option>
-                    <option v-for="cl in clients" :key="cl" :value="cl">{{cl}}</option>
-                </select>
+            <div class="col-md-4 col-sm-5 p-2 row">
+                <div class="col-3 text-muted">
+                    <span>Client </span>
+                </div>
+                <div class="col-9">
+                    <select v-model="client" class="form-select form-select-md">
+                        <option value=""></option>
+                        <option v-for="cl in clients" :key="cl" :value="cl.nom">{{cl.nom}}</option>
+                    </select>
+                </div>
             </div>
-            <div class="col-md-3 col-sm-5 p-2">
-                <select v-model="status" class="form-select form-select-md">
-                    <option value=""></option>
-                    <option value="Prospecter">Prospecter</option>
-                    <option value="En cours">En cours</option>
-                    <option value="Reception provisoir">Reception provisoir</option>
-                    <option value="Reception définitif">Reception définitif</option>
-                    <option value="Cloturer">Cloturer</option>
-                </select>
+            <div class="col-md-4 col-sm-5 p-2 row">
+                <div class="col-3 text-muted">
+                    <span>Status </span>
+                </div>
+                <div class="col-9">
+                    <select v-model="status" class="form-select form-select-md">
+                        <option value=""></option>
+                        <option value="Prospecter">Prospecter</option>
+                        <option value="En cours">En cours</option>
+                        <option value="Reception provisoir">Reception provisoir</option>
+                        <option value="Reception définitif">Reception définitif</option>
+                        <option value="Cloturer">Cloturer</option>
+                    </select>
+                </div>
             </div>
             <div class="col-md-4 col-sm-6 p-2">
                 <button @click="filterProjects" class="btn btn-secondary">Filter</button>
@@ -26,6 +36,7 @@
 
 <script>
 import EventBus from "@vertx/eventbus-bridge-client.js";
+import axios from "axios";
 export default {
     data(){
         return{
@@ -78,17 +89,23 @@ export default {
         }
     },
     mounted(){
-        var ref=this
-        var eb = new EventBus('http://localhost:8888/eventbus');
-        eb.onopen = function() {
-            eb.send('get.client.all', "",(err,msg) =>{
-            if(err){
-                console.log(err);
-                return
-            }
-            ref.clients=msg.body.clients
-            });
-        };
+        // var ref=this
+        // var eb = new EventBus('http://localhost:8888/eventbus');
+        // eb.onopen = function() {
+        //     eb.send('get.client.all', "",(err,msg) =>{
+        //     if(err){
+        //         console.log(err);
+        //         return
+        //     }
+        //     ref.clients=msg.body.clients
+        //     console.log(msg.body);
+        //     });
+        // };
+        axios.get('http://localhost:8888/clients')
+        .then(res=>{
+            this.clients=res.data
+            })
+        .catch(err=>console.log(err))
     }
 }
 </script>

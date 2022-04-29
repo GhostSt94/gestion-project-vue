@@ -6,7 +6,7 @@ import AddProject from './components/add/AddProject.vue'
 import AddClient from './components/add/AddClient.vue'
 import ListeClients from './components/ListeClients.vue'
 import ProjectDetails from './components/ProjectDetails.vue'
-import RegisterUser from './components/auth/RegisterUser.vue'
+import AuthUser from './components/auth/AuthUser.vue'
 
 const router = VueRouter.createRouter({
     history: VueRouter.createWebHistory(),
@@ -42,9 +42,9 @@ const router = VueRouter.createRouter({
             component: ProjectDetails
         },
         {
-            path: '/auth/register',
-            name: 'register',
-            component: RegisterUser
+            path: '/auth',
+            name: 'Auth',
+            component: AuthUser
         },
         {
             path: '/:catchAll(.*)',

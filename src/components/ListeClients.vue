@@ -27,6 +27,9 @@ export default {
         }
     },
     mounted(){
+        if(sessionStorage.getItem('id')===null){
+            this.$router.push('/auth')
+        }
         axios.get('http://localhost:8888/clients')
         .then(res=>{this.clients=res.data})
         .catch(err=>console.log(err))

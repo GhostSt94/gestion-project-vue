@@ -309,6 +309,9 @@ export default {
         }
     },
     mounted(){
+        if(sessionStorage.getItem('id')===null){
+            this.$router.push('/auth')
+        }
         var ref=this
         var eb = new EventBus('http://localhost:8888/eventbus');
         eb.onopen = function() {
